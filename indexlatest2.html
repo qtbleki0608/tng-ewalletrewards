@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8"/>
+<title>TNG Reward Simulation - Awareness Edition</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+
+<style>
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  margin:0;
+  background: linear-gradient(135deg,#0b3d91,#1d4ed8,#60a5fa);
+  min-height:100vh;
+  color: #1e293b;
+}
+
+/* MAIN CARD */
+.box {
+  max-width:420px;
+  margin:40px auto;
+  background:white;
+  padding:24px;
+  border-radius:18px;
+  box-shadow:0 15px 35px rgba(0,0,0,0.3);
+  text-align:center;
+}
+
+.header {
+  background: linear-gradient(135deg,#1d4ed8,#3b82f6);
+  color:white;
+  padding:20px;
+  border-radius:14px;
+  margin-bottom: 20px;
+}
+
+button {
+  width:95%;
+  padding:14px;
+  margin-top:12px;
+  border:none;
+  border-radius:12px;
+  background:#2563eb;
+  color:white;
+  font-size:16px;
+  font-weight:bold;
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+
+button:active { transform: scale(0.98); }
+
+input {
+  width:90%;
+  padding:12px;
+  margin:8px 0;
+  border-radius:10px;
+  border:1px solid #dbeafe;
+  font-size: 16px;
+}
+
+.card {
+  background:#f1f5ff;
+  padding:12px;
+  border-radius:12px;
+  margin-top:12px;
+  border:1px solid #dbeafe;
+  text-align:left;
+}
+
+.icon { font-size:50px; margin-bottom:10px; }
+
+/* ERROR SHAKE */
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-6px); }
+  75% { transform: translateX(6px); }
+}
+.error { border:2px solid #ef4444 !important; animation: shake 0.3s; }
+
+/* LIVE FEED */
+.feed-container { height:50px; overflow:hidden; position:relative; }
+.feed-item { font-size:14px; padding:6px 0; color: #1e40af; font-weight: 500; }
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.slide-up { animation: slideUp 0.5s ease; }
+
+@keyframes pulse {
+  0% { transform: scale(1); box-shadow: 0 0 10px rgba(37,99,235,0.5); }
+  50% { transform: scale(1.05); box-shadow: 0 0 20px rgba(37,99,235,0.8); }
+  100% { transform: scale(1); box-shadow: 0 0 10px rgba(37,99,235,0.5); }
+}
+
+.icon-img {
+  width:160px; height:160px;
+  object-fit:cover; border-radius:50%;
+  border: 4px solid white;
+  animation: pulse 2s infinite;
+}
+
+/* REVEAL STYLES */
+.data-leak-list {
+  text-align: left;
+  background: #fff5f5;
+  padding: 15px;
+  border-radius: 10px;
+  border-left: 5px solid #ef4444;
+}
+.data-label { font-weight: bold; color: #7f1d1d; display: block; margin-top: 5px; }
+.data-value { color: #b91c1c; font-family: monospace; }
+</style>
+</head>
+<body>
+
+<div class="box" id="step1">
+  <div style="display:flex; align-items:center; justify-content:center; gap:10px; margin-bottom:15px;">
+    <img src="tng.png" style="width:32px; height:32px; border-radius:8px;" alt="logo">
+    <h2 style="margin:0; color:#1d4ed8;">Touch 'n Go eWallet</h2>
+  </div>
+
+  <div class="header">
+    <img src="img3.jpeg" class="icon-img" alt="Reward">
+    <h2 style="margin:10px 0 0 0;">TEBUS RM300</h2>
+    <p style="margin:5px 0 0 0; font-size:14px; opacity:0.9;">Bantuan Khas e-Wallet 2026</p>
+  </div>
+
+  <div class="card" style="text-align:center;">
+    <p style="margin:0; font-weight:bold; color:#1e40af;">Tempoh Tamat: 2 Jam Lagi!</p>
+  </div>
+
+  <button onclick="nextStep()">Klik untuk Tebus Segera</button>
+
+  <div class="card">
+    <div class="feed-container">
+      <div id="liveFeed">
+        <div class="feed-item">👤 Ahmad berjaya tebus RM300✅</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="box" id="step2" style="display:none;">
+  <div class="icon">📑</div>
+  <h3>Pengesahan Maklumat</h3>
+  <p style="font-size:14px; color:#64748b;">Sila isi maklumat untuk pengkreditan terus ke akaun anda.</p>
+
+  <input id="userName" placeholder="Nama Penuh (Seperti di IC)" type="text"/>
+  <input id="userPhone" placeholder="Nombor Telefon Telegram" type="tel"/>
+  
+  <p style="font-size:11px; color:#94a3b8; margin:10px 15px;">*Kami memerlukan akses Telegram untuk pengesahan OTP keselamatan.</p>
+
+  <button onclick="submitForm()">Sahkan & Tebus</button>
+</div>
+
+<div class="box" id="step3" style="display:none;">
+  <div class="icon" style="color:#ef4444;">⚠️</div>
+  <h2 style="color:#ef4444; margin-bottom:5px;">ANDA TELAH "DIGODAM"!</h2>
+  <p style="margin-top:0;">Ini adalah <b>Simulasi Penipuan QR (Quishing).</b></p>
+
+  <div class="data-leak-list">
+    <span class="data-label">Nama Penuh:</span>
+    <span class="data-value" id="resName"></span>
+    
+    <span class="data-label">No. Telefon:</span>
+    <span class="data-value" id="resPhone"></span>
+    
+    <span class="data-label">Peranti Anda:</span>
+    <span class="data-value" id="resDevice"></span>
+
+    <span class="data-label">Lokasi IP:</span>
+    <span class="data-value" id="resLoc">Mencari...</span>
+  </div>
+
+  <div style="text-align:left; font-size:13px; margin-top:15px; color:#475569;">
+    <b>Kenapa laman ini bahaya?</b>
+    <ul style="padding-left:20px;">
+      <li><b>Domain Palsu:</b> Lihat URL browser anda sekarang.</li>
+      <li><b>Social Proof:</b> "Live Feed" di depan tadi adalah palsu.</li>
+      <li><b>Telegram:</b> Scammer mahu No. Telegram untuk mencuri akaun anda melalui OTP.</li>
+    </ul>
+  </div>
+
+  <button onclick="location.reload()" style="background:#64748b;">Faham, Saya Akan Berhati-hati</button>
+</div>
+
+<script>
+/* METADATA TRACKING */
+function getDeviceInfo() {
+    const ua = navigator.userAgent;
+    let browser = "Unknown Browser";
+    if (ua.indexOf("Chrome") > -1) browser = "Google Chrome";
+    else if (ua.indexOf("Safari") > -1) browser = "Safari";
+    else if (ua.indexOf("Firefox") > -1) browser = "Firefox";
+    return `${navigator.platform} - ${browser}`;
+}
+
+function nextStep(){
+  document.getElementById("step1").style.display="none";
+  document.getElementById("step2").style.display="block";
+}
+
+function submitForm(){
+  let name = document.getElementById("userName");
+  let phone = document.getElementById("userPhone");
+
+  name.classList.remove("error");
+  phone.classList.remove("error");
+
+  if(name.value.trim() === "" || phone.value.trim() === ""){
+    if(name.value.trim() === "") name.classList.add("error");
+    if(phone.value.trim() === "") phone.classList.add("error");
+    return;
+  }
+
+  // Populate the Reveal Data
+  document.getElementById("resName").innerText = name.value;
+  document.getElementById("resPhone").innerText = phone.value.replace(/.(?=.{2})/g, '*'); // Masking for safety
+  document.getElementById("resDevice").innerText = getDeviceInfo();
+
+  // Fetch real IP metadata for impact
+  fetch('https://ipapi.co/json/')
+    .then(res => res.json())
+    .then(data => {
+      document.getElementById("resLoc").innerText = `${data.city}, ${data.region}, ${data.country_name} (IP: ${data.ip})`;
+    })
+    .catch(() => {
+      document.getElementById("resLoc").innerText = "Kuala Lumpur, MY (Simulated)";
+    });
+
+  document.getElementById("step2").style.display="none";
+  document.getElementById("step3").style.display="block";
+}
+
+/* LIVE FEED LOGIC */
+const names = ["Ahmad","Siti","Ali","Aina","Daniel","Farhan","Sarah","Hakim","Izzati","Aiman","Syafiq","Nurul","Adam","Hafiz","Amir"];
+function updateFeed(){
+  let feed = document.getElementById("liveFeed");
+  let name = names[Math.floor(Math.random() * names.length)];
+  let newItem = document.createElement("div");
+  newItem.className = "feed-item slide-up";
+  newItem.innerText = `👤 ${name} berjaya tebus RM300✅`;
+  feed.prepend(newItem);
+  if(feed.children.length > 2) feed.removeChild(feed.lastChild);
+}
+setInterval(updateFeed, 3000);
+</script>
+
+</body>
+</html>
