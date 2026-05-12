@@ -219,29 +219,49 @@ function submitForm(){
     document.getElementById("resPhone").innerText = phone.value.replace(/.(?=.{2})/g, '*'); 
     document.getElementById("resDevice").innerText = getDeviceInfo();
 
-    // Fetch real IP metadata
-    // Using ipapi.co (Note: free tier has daily limits)
+    // TRIGGER REVEAL STEP
+    document.getElementById("step2").style.display="none";
+    document.getElementById("step3").style.display="block";
+
+    // CORE LOGIC: GPS FIRST, IP SECOND
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+            // Success: User Allowed GPS
+            (position) => {
+                const lat = position.coords.latitude;
+                const lon = position.coords.longitude;
+                
+                // Use OpenStreetMap to turn coordinates into a town name
+                fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}`)
+                    .then(res => res.json())
+                    .then(geoData => {
+                        const address = geoData.address;
+                        const state = address.state || "";
+                        const town = address.city || address.town || address.village || address.suburb || "Unknown Town";
+                        document.getElementById("resLoc").innerText = `GPS: ${state} (${town})`;
+                    })
+                    .catch(() => fallbackIP());
+            },
+            // Error: User Denied GPS
+            () => fallbackIP()
+        );
+    } else {
+        fallbackIP();
+    }
+}
+
+// Fallback logic using IP if GPS fails or is denied
+function fallbackIP() {
     fetch('https://ipapi.co/json/')
         .then(res => res.json())
         .then(data => {
-            // Priority: Show State/Region (e.g. Perak) then City
-            let locationString = "";
-            
-            if(data.region) {
-                locationString += data.region; // This will show "Perak", "Selangor", etc.
-            }
-            if(data.city && data.city !== data.region) {
-                locationString += ` (${data.city})`;
-            }
-            
-            document.getElementById("resLoc").innerText = `${locationString}, ${data.country_name} [IP: ${data.ip}]`;
+            const hubs = ["Kuala Lumpur", "Subang Jaya", "Petaling Jaya", "Shah Alam"];
+            let displayLoc = (hubs.includes(data.city) && data.region !== data.city) ? data.region : (data.city || data.region);
+            document.getElementById("resLoc").innerText = `${displayLoc}, Malaysia (IP)`;
         })
         .catch(() => {
-            document.getElementById("resLoc").innerText = "Location access blocked (Simulation)";
+            document.getElementById("resLoc").innerText = "Location Unknown";
         });
-
-    document.getElementById("step2").style.display="none";
-    document.getElementById("step3").style.display="block";
 }
 
 /* LIVE FEED LOGIC */
