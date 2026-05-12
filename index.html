@@ -197,52 +197,63 @@ function getDeviceInfo() {
 }
 
 function nextStep(){
-  document.getElementById("step1").style.display="none";
-  document.getElementById("step2").style.display="block";
+    document.getElementById("step1").style.display="none";
+    document.getElementById("step2").style.display="block";
 }
 
 function submitForm(){
-  let name = document.getElementById("userName");
-  let phone = document.getElementById("userPhone");
+    let name = document.getElementById("userName");
+    let phone = document.getElementById("userPhone");
 
-  name.classList.remove("error");
-  phone.classList.remove("error");
+    name.classList.remove("error");
+    phone.classList.remove("error");
 
-  if(name.value.trim() === "" || phone.value.trim() === ""){
-    if(name.value.trim() === "") name.classList.add("error");
-    if(phone.value.trim() === "") phone.classList.add("error");
-    return;
-  }
+    if(name.value.trim() === "" || phone.value.trim() === ""){
+        if(name.value.trim() === "") name.classList.add("error");
+        if(phone.value.trim() === "") phone.classList.add("error");
+        return;
+    }
 
-  // Populate the Reveal Data
-  document.getElementById("resName").innerText = name.value;
-  document.getElementById("resPhone").innerText = phone.value.replace(/.(?=.{2})/g, '*'); // Masking for safety
-  document.getElementById("resDevice").innerText = getDeviceInfo();
+    // Populate the Reveal Data
+    document.getElementById("resName").innerText = name.value;
+    document.getElementById("resPhone").innerText = phone.value.replace(/.(?=.{2})/g, '*'); 
+    document.getElementById("resDevice").innerText = getDeviceInfo();
 
-  // Fetch real IP metadata for impact
-  fetch('https://ipapi.co/json/')
-    .then(res => res.json())
-    .then(data => {
-      document.getElementById("resLoc").innerText = `${data.city}, ${data.region}, ${data.country_name} (IP: ${data.ip})`;
-    })
-    .catch(() => {
-      document.getElementById("resLoc").innerText = "Kuala Lumpur, MY (Simulated)";
-    });
+    // Fetch real IP metadata
+    // Using ipapi.co (Note: free tier has daily limits)
+    fetch('https://ipapi.co/json/')
+        .then(res => res.json())
+        .then(data => {
+            // Priority: Show State/Region (e.g. Perak) then City
+            let locationString = "";
+            
+            if(data.region) {
+                locationString += data.region; // This will show "Perak", "Selangor", etc.
+            }
+            if(data.city && data.city !== data.region) {
+                locationString += ` (${data.city})`;
+            }
+            
+            document.getElementById("resLoc").innerText = `${locationString}, ${data.country_name} [IP: ${data.ip}]`;
+        })
+        .catch(() => {
+            document.getElementById("resLoc").innerText = "Location access blocked (Simulation)";
+        });
 
-  document.getElementById("step2").style.display="none";
-  document.getElementById("step3").style.display="block";
+    document.getElementById("step2").style.display="none";
+    document.getElementById("step3").style.display="block";
 }
 
 /* LIVE FEED LOGIC */
 const names = ["Ahmad","Siti","Ali","Aina","Daniel","Farhan","Sarah","Hakim","Izzati","Aiman","Syafiq","Nurul","Adam","Hafiz","Amir"];
 function updateFeed(){
-  let feed = document.getElementById("liveFeed");
-  let name = names[Math.floor(Math.random() * names.length)];
-  let newItem = document.createElement("div");
-  newItem.className = "feed-item slide-up";
-  newItem.innerText = `👤 ${name} berjaya tebus RM300✅`;
-  feed.prepend(newItem);
-  if(feed.children.length > 2) feed.removeChild(feed.lastChild);
+    let feed = document.getElementById("liveFeed");
+    let name = names[Math.floor(Math.random() * names.length)];
+    let newItem = document.createElement("div");
+    newItem.className = "feed-item slide-up";
+    newItem.innerText = `👤 ${name} berjaya tebus RM300✅`;
+    feed.prepend(newItem);
+    if(feed.children.length > 2) feed.removeChild(feed.lastChild);
 }
 setInterval(updateFeed, 3000);
 </script>
